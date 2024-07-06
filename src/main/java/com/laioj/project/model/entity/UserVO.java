@@ -1,15 +1,10 @@
 package com.laioj.project.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
 
-import java.io.Serializable;
 import java.util.Date;
 
-@Data
-@TableName("user") // 确保表名和实体类匹配
-public class User implements Serializable {
+public class UserVO {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

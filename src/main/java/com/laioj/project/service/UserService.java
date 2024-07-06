@@ -73,5 +73,7 @@ public interface UserService extends IService<User> {
 
     User getSafetyUser(User originUser);
     User getUser(User user);
+
+    void getUserTest();
 }
 

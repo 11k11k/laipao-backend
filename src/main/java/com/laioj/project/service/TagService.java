@@ -1,7 +1,10 @@
 package com.laioj.project.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.laioj.project.model.entity.Tag;
-public interface TagService{
+import com.laioj.project.model.entity.User;
+
+public interface TagService  extends IService<Tag> {
 
     int deleteByPrimaryKey(Long id);
 

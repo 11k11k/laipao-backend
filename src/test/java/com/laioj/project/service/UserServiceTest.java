@@ -40,10 +40,13 @@ class UserServiceTest {
         List<String> tagNameList = Arrays.asList("java", "c++");
         List<User> userList = userService.searchUsersByTags(tagNameList);
         Assertions.assertNotNull(userList);
-        LinkedList<Object> objects = new LinkedList<>();
-        Assert.isAssignable(Arrays.asList(1,2,3,4).getClass(), objects.getClass());
     }
+    @Test
+    void testSearchUsers(){
+        List<User> users = userMapper.selectList(null);
 
+        Assertions.assertNotNull(users);
+    }
 //
 //    @Test
 //    void testAddUser() {
@@ -53,12 +56,12 @@ class UserServiceTest {
 //        Assertions.assertTrue(result);
 //    }
 //
-//    @Test
-//    void testUpdateUser() {
-//        User user = new User();
-//        boolean result = userService.updateById(user);
-//        Assertions.assertTrue(result);
-//    }
+    @Test
+    void testUpdateUser() {
+        User user = new User();
+        boolean result = userService.updateById(user);
+        Assertions.assertTrue(result);
+    }
 //
 //    @Test
 //    void testDeleteUser() {
@@ -66,11 +69,11 @@ class UserServiceTest {
 //        Assertions.assertTrue(result);
 //    }
 //
-//    @Test
-//    void testGetUser() {
-//        User user = userService.getById(1L);
-//        Assertions.assertNotNull(user);
-//    }
+    @Test
+    void testGetUser() {
+        User user = userService.getById(1L);
+        Assertions.assertNotNull(user);
+    }
 //
 //    @Test
 //    void userRegister() {

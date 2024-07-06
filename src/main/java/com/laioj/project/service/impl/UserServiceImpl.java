@@ -84,38 +84,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> searchUsersByTags(List<String> tagNameList) {
+//        判断是否为null或则是否有空白字符
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-//        //拼接and 查询
-//        for (String tagName : tagNameList) {
-//            userQueryWrapper= userQueryWrapper.like("tags", tagName);
-//        }
-//        List<User> userList = userMapper.selectList(userQueryWrapper);
-        List<User> userList = userMapper.getByTags(tagNameList);
-        if(CollectionUtils.isEmpty(userList)){
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        //拼接and 查询
+        for (String tagName : tagNameList) {
+            userQueryWrapper = userQueryWrapper.like("tags", tagName);
+        }
+        List<User> userList = userMapper.selectList(userQueryWrapper);
+//        List<User> userList = userMapper.getByTags(tagNameList);
+        if (CollectionUtils.isEmpty(userList)) {
             System.out.println("为空");
         }
-        List<User> collect = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+//        List<User> collect = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
 //        System.out.println(collect);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        return collect;
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+//        return collect;
 //
 //        List<User> userList = userMapper.selectList(queryWrapper);
 //        List<User> userList = userMapper.selectAll();
-//        Gson gson = new Gson();
+        Gson gson = new Gson();
         //2.在内存中判断是否包含要求的标签
-//        return userList.stream().filter(user -> {
-//            String tagsStr = user.getTags();
-//            Set<String> temTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
-//            }.getType());
-//            for (String tagName : tagNameList) {
-//                if (!temTagNameSet.contains(tagName)) {
-//                    return false;
-//                }
-//            }return true;
-//        }).map(this::getSafetyUser).collect(Collectors.toList());
+        return userList.stream().filter(user -> {
+            String tagsStr = user.getTags();
+            Set<String> temTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
+            }.getType());
+            for (String tagName : tagNameList) {
+                if (!temTagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 
     @Override
@@ -132,6 +134,7 @@ public class UserServiceImpl implements UserService {
 //        safetyUser.setEmail(originUser.getEmail());
 //        safetyUser.setPlanetCode(originUser.getPlanetCode());
 //        safetyUser.setUserStatus(originUser.getUserStatus());
+        safetyUser.setUserProfile(originUser.getUserProfile());
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setCreateTime(originUser.getCreateTime());
         safetyUser.setTags(originUser.getTags());
@@ -186,5 +189,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Class<User> getEntityClass() {
         return null;
+    }
+
+    @Override
+    public void getUserTest() {
+        List<User> users = userMapper.selectList(null);
+        System.out.println("users" + users);
     }
 }

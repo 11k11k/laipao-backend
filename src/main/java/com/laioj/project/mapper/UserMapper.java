@@ -1,4 +1,5 @@
 package com.laioj.project.mapper;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -22,9 +23,9 @@ public interface UserMapper extends BaseMapper<User> {
 
     List<User> selectAll();
 
-    User getById(@Param("id")Long id);
+    User getById(@Param("id") Long id);
 
-List<User> getByTags(@Param("tags")List tags);
+    List<User> getByTags(@Param("tags") List<String> tags);
 
 
 }
