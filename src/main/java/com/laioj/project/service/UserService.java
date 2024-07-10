@@ -50,6 +50,8 @@ public interface UserService extends IService<User> {
      */
     boolean isAdmin(HttpServletRequest request);
 
+    boolean isAdmin(User loginUser);
+
     /**
      * 用户注销
      *
@@ -67,6 +69,10 @@ public interface UserService extends IService<User> {
     User selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(User record);
+
+    int updateByPrimaryKeySelective(User user, User loginUser);
+
+    User getCurrentUser(HttpServletRequest request);
 
     int updateByPrimaryKey(User record);
 

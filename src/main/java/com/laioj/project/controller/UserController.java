@@ -113,5 +113,20 @@ public class UserController {
         return ResultUtils.success(safetyUser);
     }
 
+    //修改用户信息
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest httpServletRequest) {
+        if(user==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User currentUser = userService.getCurrentUser(httpServletRequest);
+        if(currentUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+
+        int result = userService.updateByPrimaryKeySelective(user, currentUser);
+
+        return ResultUtils.success(result);
+    }
 
 }
