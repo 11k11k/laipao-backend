@@ -12,6 +12,8 @@ import java.util.List;
  */
 public interface UserService extends IService<User> {
 
+    long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode);
+
     /**
      * 用户注册
      *

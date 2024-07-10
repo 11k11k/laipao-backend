@@ -37,4 +37,14 @@ public class UserControllerTest {
         BaseResponse<List<User>> userBaseResponse = userController.searchUserByTag(list);
         Assert.notNull(userBaseResponse);
     }
+
+    @Test
+    void userLogin() {
+
+    }
+
+    @Test
+    void getCurrentUser() {
+
+    }
 }

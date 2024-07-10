@@ -1,6 +1,8 @@
 package com.laioj.project.model.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -12,7 +14,7 @@ import java.util.Date;
 public class User implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
-
+    @TableId(type = IdType.AUTO)
     private Long id; // id 列应在表中存在
 
     @TableField("user_account")

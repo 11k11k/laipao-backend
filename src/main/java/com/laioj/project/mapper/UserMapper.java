@@ -26,6 +26,8 @@ public interface UserMapper extends BaseMapper<User> {
     User getById(@Param("id") Long id);
 
     List<User> getByTags(@Param("tags") List<String> tags);
+    Long countByUserAccount(@Param("userAccount")String userAccount);
+
 
 
 }
