@@ -67,40 +67,42 @@ public class UserServiceImpl implements UserService {
             return -1;
         }
         // 账户不能重复
-//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("user_account", userAccount);
-//        long count = userMapper.selectCount(queryWrapper);
-        Long l = userMapper.countByUserAccount(userAccount);
-//        if (count > 0) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", userAccount);
+        long count = userMapper.selectCount(queryWrapper);
+//        Long l = userMapper.countByUserAccount(userAccount);
+        if (count > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+        }
+//        if (l > 0) {
 //            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
 //        }
-        if(l>0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号重复");
-        }
         // 星球编号不能重复
-//        queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("planetCode", planetCode);
-//        count = userMapper.selectCount(queryWrapper);
-//        if (count > 0) {
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR, "编号重复");
-//        }
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("planetCode", planetCode);
+        count = userMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "编号重复");
+        }
         // 2. 加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
         // 3. 插入数据
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
-//        user.setPlanetCode(planetCode);
-//        log.info("打印User",user);
+        user.setPlanetCode(planetCode);
+        log.info("打印User",user);
+        System.out.println(user);
 //        boolean saveResult = this.save(user);
-        int insert = userMapper.insert(user);
+//
 //        if (!saveResult) {
 //            return -1;
 //        }
+        int insert = userMapper.insertSelective(user);
+
         System.out.println(insert);
         log.info(String.valueOf(user));
-        if(insert<0)
-        {
+        if (insert < 0) {
             return -1;
         }
         return user.getId();
@@ -131,17 +133,23 @@ public class UserServiceImpl implements UserService {
         }
         // 2. 加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-        // 查询用户是否存在
+//         查询用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_account", userAccount);
-        queryWrapper.eq("user_password", encryptPassword);
+        queryWrapper.eq("userAccount", userAccount);
+        queryWrapper.eq("userPassword", encryptPassword);
 
         User user = userMapper.selectOne(queryWrapper);
-        // 用户不存在
+//        User user = userMapper.selectAllByUserAccountAndUserPassword(userAccount, encryptPassword);
+
         if (user == null) {
             log.info("user login failed, userAccount cannot match userPassword");
             return null;
         }
+        // 用户不存在
+//        if (user == null) {
+//            log.info("user login failed, userAccount cannot match userPassword");
+//            return null;
+//        }
         // 3. 用户脱敏
         User safetyUser = getSafetyUser(user);
         // 4. 记录用户的登录态
@@ -205,25 +213,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int updateByPrimaryKeySelective(User user, User loginUser) {
+//       获取前端获取到的id,判断参数是否正确
         long userId = user.getId();
         if (userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
         // todo 补充校验，如果用户没有传任何要更新的值，就直接报错，不用执行 update 语句
+
+
         // 如果是管理员，允许更新任意用户
         // 如果不是管理员，只允许更新当前（自己的）信息
         if (!isAdmin(loginUser) && userId != loginUser.getId()) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
-        User oldUser = userMapper.getById(userId);
+        User oldUser = userMapper.selectById(userId);
         if (oldUser == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR);
         }
-        return userMapper.updateByPrimaryKeySelective(user);
+        return userMapper.updateById(user);
     }
 
     @Override
-    public User getCurrentUser(HttpServletRequest request){
+    public User getCurrentUser(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
@@ -242,26 +254,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> searchUsersByTags(List<String> tagNameList) {
 //        判断是否为null或则是否有空白字符
-//        if (CollectionUtils.isEmpty(tagNameList)) {
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-//        }
-//        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-//        //拼接and 查询
-//        for (String tagName : tagNameList) {
-//            userQueryWrapper = userQueryWrapper.like("tags", tagName);
-//        }
-//        List<User> userList = userMapper.selectList(userQueryWrapper);
-////        List<User> userList = userMapper.getByTags(tagNameList);
-//        if (CollectionUtils.isEmpty(userList)) {
-//            System.out.println("为空");
-//        }
-//        List<User> collect = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
-//        System.out.println(collect);
-//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-//        return collect;
-//
-//        List<User> userList = userMapper.selectList(queryWrapper);
-//        List<User> userList = userMapper.selectAll();
+        if (CollectionUtils.isEmpty(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        //拼接and 查询
+        for (String tagName : tagNameList) {
+            userQueryWrapper = userQueryWrapper.like("tags", tagName);
+        }
+        List<User> userList = userMapper.selectList(userQueryWrapper);
+//        List<User> userList = userMapper.getByTags(tagNameList);
+        if (CollectionUtils.isEmpty(userList)) {
+            System.out.println("为空");
+        }
+        List<User> collect = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        System.out.println(collect);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        return collect;
+
+////        List<User> userList = userMapper.selectList(queryWrapper);
+////        List<User> userList = userMapper.selectAll();
 //        Gson gson = new Gson();
 //        //2.在内存中判断是否包含要求的标签
 //        return userList.stream().filter(user -> {
@@ -276,27 +288,28 @@ public class UserServiceImpl implements UserService {
 //            return true;
 //        }).map(this::getSafetyUser).collect(Collectors.toList());
 
-        if (CollectionUtils.isEmpty(tagNameList)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        // 1. 先查询所有用户
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        List<User> userList = userMapper.selectList(queryWrapper);
-        Gson gson = new Gson();
-        // 2. 在内存中判断是否包含要求的标签
-        return userList.stream().filter(user -> {
-            String tagsStr = user.getTags();
-            Set<String> tempTagNameSet = new HashSet<>();
-            try {
-                log.info("Parsing tags for user: " + user.getUserName() + ", tagsStr: " + tagsStr);
-                tempTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>(){}.getType());
-                tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
-            } catch (JsonSyntaxException e) {
-                log.error("Failed to parse tags for user: " + user.getUserName() + ", tagsStr: " + tagsStr, e);
-                return false;  // or handle the error as needed
-            }
-            return true;
-        }).map(this::getSafetyUser).collect(Collectors.toList());
+//        if (CollectionUtils.isEmpty(tagNameList)) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+//        }
+//        // 1. 先查询所有用户
+//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+//        List<User> userList = userMapper.selectList(queryWrapper);
+//        log.info("userList size:" + userList);
+//        Gson gson = new Gson();
+//        // 2. 在内存中判断是否包含要求的标签
+//        return userList.stream().filter(user -> {
+//            String tagsStr = user.getTags();
+//            log.info(tagsStr);
+//            Set<String> tempTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>()
+//            {}.getType());
+//            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
+//            for (String tagName : tagNameList) {
+//                if (!tempTagNameSet.contains(tagName)) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 
     @Override
@@ -307,13 +320,13 @@ public class UserServiceImpl implements UserService {
         User safetyUser = new User();
         safetyUser.setId(originUser.getId());
         safetyUser.setUserAccount(originUser.getUserAccount());
-        safetyUser.setUserName(originUser.getUserName());
-//        safetyUser.setGender(originUser.getGender());
-//        safetyUser.setPhone(originUser.getPhone());
-//        safetyUser.setEmail(originUser.getEmail());
-//        safetyUser.setPlanetCode(originUser.getPlanetCode());
-//        safetyUser.setUserStatus(originUser.getUserStatus());
-        safetyUser.setUserProfile(originUser.getUserProfile());
+        safetyUser.setUsername(originUser.getUsername());
+        safetyUser.setGender(originUser.getGender());
+        safetyUser.setPhone(originUser.getPhone());
+        safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setPlanetCode(originUser.getPlanetCode());
+        safetyUser.setUserStatus(originUser.getUserStatus());
+//        safetyUser.setUserprofile(originUser.getUserProfile());
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setCreateTime(originUser.getCreateTime());
         safetyUser.setTags(originUser.getTags());

@@ -5,27 +5,29 @@
     <!--@mbg.generated-->
     <!--@Table `user`-->
     <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="user_account" jdbcType="VARCHAR" property="userAccount" />
-    <result column="user_password" jdbcType="VARCHAR" property="userPassword" />
-    <result column="union_id" jdbcType="VARCHAR" property="unionId" />
-    <result column="mp_open_id" jdbcType="VARCHAR" property="mpOpenId" />
-    <result column="user_name" jdbcType="VARCHAR" property="userName" />
-    <result column="user_avatar" jdbcType="VARCHAR" property="userAvatar" />
-    <result column="user_profile" jdbcType="VARCHAR" property="userProfile" />
-    <result column="user_role" jdbcType="VARCHAR" property="userRole" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="userAccount" jdbcType="VARCHAR" property="userAccount" />
+    <result column="avatarUrl" jdbcType="VARCHAR" property="avatarUrl" />
+    <result column="gender" jdbcType="TINYINT" property="gender" />
+    <result column="userPassword" jdbcType="VARCHAR" property="userPassword" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="userStatus" jdbcType="INTEGER" property="userStatus" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="updateTime" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="isDelete" jdbcType="TINYINT" property="isDelete" />
+    <result column="userRole" jdbcType="INTEGER" property="userRole" />
+    <result column="planetCode" jdbcType="VARCHAR" property="planetCode" />
     <result column="tags" jdbcType="VARCHAR" property="tags" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_account, user_password, union_id, mp_open_id, user_name, user_avatar, user_profile, 
-    user_role, create_time, update_time, is_delete, tags
+    id, username, userAccount, avatarUrl, gender, userPassword, phone, email, userStatus,
+    createTime, updateTime, isDelete, userRole, planetCode, tags
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     <!--@mbg.generated-->
-    select 
+    select
     <include refid="Base_Column_List" />
     from `user`
     where id = #{id,jdbcType=BIGINT}
@@ -36,83 +38,81 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.laioj.project.model.entity.User" useGeneratedKeys="true">
-    <!--@mbg.generated-->
-    insert into `user` (user_account, user_password, union_id, 
-      mp_open_id, user_name, user_avatar, 
-      user_profile, user_role, create_time, 
-      update_time, is_delete, tags
-      )
-    values (#{userAccount,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR}, #{unionId,jdbcType=VARCHAR}, 
-      #{mpOpenId,jdbcType=VARCHAR}, #{userName,jdbcType=VARCHAR}, #{userAvatar,jdbcType=VARCHAR}, 
-      #{userProfile,jdbcType=VARCHAR}, #{userRole,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{updateTime,jdbcType=TIMESTAMP}, #{isDelete,jdbcType=TINYINT}, #{tags,jdbcType=VARCHAR}
-      )
+    INSERT INTO `user` (userAccount, userPassword,planetCode)
+    VALUES (#{userAccount,jdbcType=VARCHAR}, #{userPassword,jdbcType=VARCHAR},#{planetCode,jdbcType=VARCHAR})
+
   </insert>
   <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.laioj.project.model.entity.User" useGeneratedKeys="true">
     <!--@mbg.generated-->
     insert into `user`
     <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        username,
+      </if>
       <if test="userAccount != null">
-        user_account,
+        userAccount,
+      </if>
+      <if test="avatarUrl != null">
+        avatarUrl,
+      </if>
+      <if test="gender != null">
+        gender,
       </if>
       <if test="userPassword != null">
-        user_password,
+        userPassword,
       </if>
-      <if test="unionId != null">
-        union_id,
+      <if test="phone != null">
+        phone,
       </if>
-      <if test="mpOpenId != null">
-        mp_open_id,
+      <if test="email != null">
+        email,
       </if>
-      <if test="userName != null">
-        user_name,
-      </if>
-      <if test="userAvatar != null">
-        user_avatar,
-      </if>
-      <if test="userProfile != null">
-        user_profile,
-      </if>
-      <if test="userRole != null">
-        user_role,
+      <if test="userStatus != null">
+        userStatus,
       </if>
       <if test="createTime != null">
-        create_time,
+        createTime,
       </if>
       <if test="updateTime != null">
-        update_time,
+        updateTime,
       </if>
       <if test="isDelete != null">
-        is_delete,
+        isDelete,
+      </if>
+      <if test="userRole != null">
+        userRole,
+      </if>
+      <if test="planetCode != null">
+        planetCode,
       </if>
       <if test="tags != null">
         tags,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
       <if test="userAccount != null">
         #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="avatarUrl != null">
+        #{avatarUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="gender != null">
+        #{gender,jdbcType=TINYINT},
       </if>
       <if test="userPassword != null">
         #{userPassword,jdbcType=VARCHAR},
       </if>
-      <if test="unionId != null">
-        #{unionId,jdbcType=VARCHAR},
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="mpOpenId != null">
-        #{mpOpenId,jdbcType=VARCHAR},
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
       </if>
-      <if test="userName != null">
-        #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="userAvatar != null">
-        #{userAvatar,jdbcType=VARCHAR},
-      </if>
-      <if test="userProfile != null">
-        #{userProfile,jdbcType=VARCHAR},
-      </if>
-      <if test="userRole != null">
-        #{userRole,jdbcType=VARCHAR},
+      <if test="userStatus != null">
+        #{userStatus,jdbcType=INTEGER},
       </if>
       <if test="createTime != null">
         #{createTime,jdbcType=TIMESTAMP},
@@ -123,6 +123,12 @@
       <if test="isDelete != null">
         #{isDelete,jdbcType=TINYINT},
       </if>
+      <if test="userRole != null">
+        #{userRole,jdbcType=INTEGER},
+      </if>
+      <if test="planetCode != null">
+        #{planetCode,jdbcType=VARCHAR},
+      </if>
       <if test="tags != null">
         #{tags,jdbcType=VARCHAR},
       </if>
@@ -132,38 +138,44 @@
     <!--@mbg.generated-->
     update `user`
     <set>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
       <if test="userAccount != null">
-        user_account = #{userAccount,jdbcType=VARCHAR},
+        userAccount = #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="avatarUrl != null">
+        avatarUrl = #{avatarUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="gender != null">
+        gender = #{gender,jdbcType=TINYINT},
       </if>
       <if test="userPassword != null">
-        user_password = #{userPassword,jdbcType=VARCHAR},
+        userPassword = #{userPassword,jdbcType=VARCHAR},
       </if>
-      <if test="unionId != null">
-        union_id = #{unionId,jdbcType=VARCHAR},
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
       </if>
-      <if test="mpOpenId != null">
-        mp_open_id = #{mpOpenId,jdbcType=VARCHAR},
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
       </if>
-      <if test="userName != null">
-        user_name = #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="userAvatar != null">
-        user_avatar = #{userAvatar,jdbcType=VARCHAR},
-      </if>
-      <if test="userProfile != null">
-        user_profile = #{userProfile,jdbcType=VARCHAR},
-      </if>
-      <if test="userRole != null">
-        user_role = #{userRole,jdbcType=VARCHAR},
+      <if test="userStatus != null">
+        userStatus = #{userStatus,jdbcType=INTEGER},
       </if>
       <if test="createTime != null">
-        create_time = #{createTime,jdbcType=TIMESTAMP},
+        createTime = #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="updateTime != null">
-        update_time = #{updateTime,jdbcType=TIMESTAMP},
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
       </if>
       <if test="isDelete != null">
-        is_delete = #{isDelete,jdbcType=TINYINT},
+        isDelete = #{isDelete,jdbcType=TINYINT},
+      </if>
+      <if test="userRole != null">
+        userRole = #{userRole,jdbcType=INTEGER},
+      </if>
+      <if test="planetCode != null">
+        planetCode = #{planetCode,jdbcType=VARCHAR},
       </if>
       <if test="tags != null">
         tags = #{tags,jdbcType=VARCHAR},
@@ -174,29 +186,31 @@
   <update id="updateByPrimaryKey" parameterType="com.laioj.project.model.entity.User">
     <!--@mbg.generated-->
     update `user`
-    set user_account = #{userAccount,jdbcType=VARCHAR},
-      user_password = #{userPassword,jdbcType=VARCHAR},
-      union_id = #{unionId,jdbcType=VARCHAR},
-      mp_open_id = #{mpOpenId,jdbcType=VARCHAR},
-      user_name = #{userName,jdbcType=VARCHAR},
-      user_avatar = #{userAvatar,jdbcType=VARCHAR},
-      user_profile = #{userProfile,jdbcType=VARCHAR},
-      user_role = #{userRole,jdbcType=VARCHAR},
-      create_time = #{createTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP},
-      is_delete = #{isDelete,jdbcType=TINYINT},
+    set username = #{username,jdbcType=VARCHAR},
+      userAccount = #{userAccount,jdbcType=VARCHAR},
+      avatarUrl = #{avatarUrl,jdbcType=VARCHAR},
+      gender = #{gender,jdbcType=TINYINT},
+      userPassword = #{userPassword,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      userStatus = #{userStatus,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=TIMESTAMP},
+      updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      isDelete = #{isDelete,jdbcType=TINYINT},
+      userRole = #{userRole,jdbcType=INTEGER},
+      planetCode = #{planetCode,jdbcType=VARCHAR},
       tags = #{tags,jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-<!--auto generated by MybatisCodeHelper on 2024-06-25-->
+<!--auto generated by MybatisCodeHelper on 2024-07-12-->
   <select id="selectAll" resultMap="BaseResultMap">
     select
-    <include refid="Base_Column_List" />
+    <include refid="Base_Column_List"/>
     from `user`
   </select>
 
-<!--auto generated by MybatisCodeHelper on 2024-06-25-->
+<!--auto generated by MybatisCodeHelper on 2024-07-12-->
   <select id="getById" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"/>
@@ -204,22 +218,28 @@
     where id=#{id,jdbcType=BIGINT}
   </select>
 
-<!--auto generated by MybatisCodeHelper on 2024-06-25-->
+<!--auto generated by MybatisCodeHelper on 2024-07-12-->
   <select id="getByTags" resultMap="BaseResultMap">
-    SELECT
+    select
     <include refid="Base_Column_List"/>
-    FROM user
-      where
-        <foreach collection="tags" item="tag" separator=" AND " open="(" close=")">
-          tags LIKE CONCAT('%', #{tag}, '%')
-        </foreach>
-
+    from `user`
+    where tags=#{tags,jdbcType=VARCHAR}
   </select>
 
-<!--auto generated by MybatisCodeHelper on 2024-07-11-->
+<!--auto generated by MybatisCodeHelper on 2024-07-12-->
   <select id="countByUserAccount" resultType="java.lang.Long">
     select count(1)
     from `user`
-    where user_account=#{userAccount,jdbcType=VARCHAR}
+    where userAccount=#{userAccount,jdbcType=VARCHAR}
   </select>
+
+<!--auto generated by MybatisCodeHelper on 2024-07-12-->
+  <select id="selectAllByUserAccountAndUserPassword" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from `user`
+    where userAccount=#{userAccount,jdbcType=VARCHAR} and userPassword=#{userPassword,jdbcType=VARCHAR}
+  </select>
+
+
 </mapper>

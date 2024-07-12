@@ -77,7 +77,7 @@ public interface UserService extends IService<User> {
     int updateByPrimaryKey(User record);
 
     //根据标签查询用户
-    public List<User> searchUsersByTags(List<String> tagNameList);
+     List<User> searchUsersByTags(List<String> tagNameList);
 
     User getSafetyUser(User originUser);
     User getUser(User user);

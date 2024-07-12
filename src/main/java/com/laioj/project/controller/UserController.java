@@ -1,6 +1,7 @@
 package com.laioj.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.laioj.project.common.BaseResponse;
 import com.laioj.project.common.ErrorCode;
 import com.laioj.project.common.ResultUtils;
@@ -12,6 +13,7 @@ import com.laioj.project.model.request.UserRegisterRequest;
 import com.laioj.project.service.UserService;
 import com.laioj.project.service.impl.UserServiceImpl;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.laioj.project.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -32,7 +35,7 @@ import static com.laioj.project.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 public class UserController {
     /**
      * ~
@@ -58,11 +61,12 @@ public class UserController {
     }
 
     @GetMapping("/search/tags")
-    public BaseResponse<List<User>> searchUserByTag(@RequestParam(required = false) List<String> tagsList) {
-        if (CollectionUtils.isEmpty(tagsList)) {
+    public BaseResponse<List<User>> searchUserByTag(@RequestParam(required = false) List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        List<User> userList = userServiceImpl.searchUsersByTags(tagsList);
+        List<User> userList = userServiceImpl.searchUsersByTags(tagNameList);
+        System.out.println("userList:" + userList);
         return ResultUtils.success(userList);
     }
 
@@ -79,6 +83,7 @@ public class UserController {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.userLogin(userAccount, userPassword, httpServletRequest);
+        System.out.println(user);
         return ResultUtils.success(user);
     }
     //注册
@@ -107,7 +112,8 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
 //        User user = userService.getById(currentUser.getId());
-        User user = userMapper.getById(currentUser.getId());
+//        User user = userMapper.getById(currentUser.getId());
+        User user = userMapper.selectById(currentUser.getId());
         System.out.println(user);
         User safetyUser = userService.getSafetyUser(user);
         return ResultUtils.success(safetyUser);
@@ -128,5 +134,25 @@ public class UserController {
 
         return ResultUtils.success(result);
     }
-
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+//        String redisKey = String.format("laopao:user:recommend:%s", loginUser.getId());
+//        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        // 如果有缓存，直接读缓存
+//        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+//        if (userPage != null) {
+//            return ResultUtils.success(userPage);
+//        }
+        // 无缓存，查数据库
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        Page<User> userPage = userMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+        // 写缓存
+//        try {
+//            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+//        } catch (Exception e) {
+//            log.error("redis set key error", e);
+//        }
+        return ResultUtils.success(userPage);
+    }
 }

@@ -1,54 +1,94 @@
 package com.laioj.project.model.entity;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.io.Serializable;
-import java.util.Date;
-
+/**
+ * 用户
+ */
+@TableName(value = "user")
 @Data
-@TableName("user") // 确保表名和实体类匹配
 public class User implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+    /**
+     * id
+     */
     @TableId(type = IdType.AUTO)
-    private Long id; // id 列应在表中存在
+    private Long id;
 
-    @TableField("user_account")
-    private String userAccount; // 账号列
+    /**
+     * 用户昵称
+     */
+    private String username;
 
-    @TableField("user_password")
-    private String userPassword; // 密码列
+    /**
+     * 账号
+     */
+    private String userAccount;
 
-    @TableField("union_id")
-    private String unionId; // 微信开放平台id列
+    /**
+     * 用户头像
+     */
+    private String avatarUrl;
 
-    @TableField("mp_open_id")
-    private String mpOpenId; // 公众号openId列
+    /**
+     * 性别
+     */
+    private Byte gender;
 
-    @TableField("user_name")
-    private String userName; // 用户昵称列
+    /**
+     * 密码
+     */
+    private String userPassword;
 
-    @TableField("user_avatar")
-    private String userAvatar; // 用户头像列
+    /**
+     * 电话
+     */
+    private String phone;
 
-    @TableField("user_profile")
-    private String userProfile; // 用户简介列
+    /**
+     * 邮箱
+     */
+    private String email;
 
-    @TableField("user_role")
-    private String userRole; // 用户角色列
+    /**
+     * 状态 0 - 正常
+     */
+    private Integer userStatus;
 
-    @TableField("create_time")
-    private Date createTime; // 创建时间列
+    /**
+     * 创建时间
+     */
+    private Date createTime;
 
-    @TableField("update_time")
-    private Date updateTime; // 更新时间列
+    private Date updateTime;
 
-    @TableField("is_delete")
-    private Byte isDelete; // 是否删除列
+    /**
+     * 是否删除
+     */
+    private Byte isDelete;
 
-    private String tags; // 标签列表列
+    /**
+     * 用户角色 0 - 普通用户 1 - 管理员
+     */
+    private Integer userRole;
+
+    /**
+     * 星球编号
+     */
+    private String planetCode;
+
+    /**
+     * 标签 json 列表
+     */
+    private String tags;
+
 }
