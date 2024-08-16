@@ -1,11 +1,7 @@
 package com.laioj.project.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.laioj.project.common.ErrorCode;
 import com.laioj.project.constant.UserConstant;
 import com.laioj.project.exception.BusinessException;
@@ -23,7 +19,6 @@ import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -32,7 +27,7 @@ import static com.laioj.project.constant.UserConstant.USER_LOGIN_STATE;
 
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
     private UserMapper userMapper;
@@ -108,10 +103,6 @@ public class UserServiceImpl implements UserService {
         return user.getId();
     }
 
-    @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
-        return 0;
-    }
 
     @Override
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
@@ -181,35 +172,6 @@ public class UserServiceImpl implements UserService {
         return loginUser != null && Objects.equals(loginUser.getUserRole(), UserConstant.ADMIN_ROLE);
     }
 
-    @Override
-    public boolean userLogout(HttpServletRequest request) {
-        return false;
-    }
-
-    @Override
-    public int deleteByPrimaryKey(Long id) {
-        return userMapper.deleteByPrimaryKey(id);
-    }
-
-    @Override
-    public int insert(User record) {
-        return userMapper.insert(record);
-    }
-
-    @Override
-    public int insertSelective(User record) {
-        return userMapper.insertSelective(record);
-    }
-
-    @Override
-    public User selectByPrimaryKey(Long id) {
-        return userMapper.selectByPrimaryKey(id);
-    }
-
-    @Override
-    public int updateByPrimaryKeySelective(User record) {
-        return 0;
-    }
 
     @Override
     public int updateByPrimaryKeySelective(User user, User loginUser) {
@@ -244,11 +206,6 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         return (User) userObj;
-    }
-
-    @Override
-    public int updateByPrimaryKey(User record) {
-        return userMapper.updateByPrimaryKey(record);
     }
 
     @Override
@@ -326,6 +283,7 @@ public class UserServiceImpl implements UserService {
         safetyUser.setEmail(originUser.getEmail());
         safetyUser.setPlanetCode(originUser.getPlanetCode());
         safetyUser.setUserStatus(originUser.getUserStatus());
+        safetyUser.setAvatarUrl(originUser.getAvatarUrl());
 //        safetyUser.setUserprofile(originUser.getUserProfile());
         safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setCreateTime(originUser.getCreateTime());
@@ -333,59 +291,4 @@ public class UserServiceImpl implements UserService {
         return safetyUser;
     }
 
-    @Override
-    public User getUser(User user) {
-        return user;
-    }
-
-    @Override
-    public boolean saveBatch(Collection<User> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean saveOrUpdateBatch(Collection<User> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean updateBatchById(Collection<User> entityList, int batchSize) {
-        return false;
-    }
-
-    @Override
-    public boolean saveOrUpdate(User entity) {
-        return false;
-    }
-
-    @Override
-    public User getOne(Wrapper<User> queryWrapper, boolean throwEx) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getMap(Wrapper<User> queryWrapper) {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public <V> V getObj(Wrapper<User> queryWrapper, Function<? super Object, V> mapper) {
-        return null;
-    }
-
-    @Override
-    public BaseMapper<User> getBaseMapper() {
-        return null;
-    }
-
-    @Override
-    public Class<User> getEntityClass() {
-        return null;
-    }
-
-    @Override
-    public void getUserTest() {
-        List<User> users = userMapper.selectList(null);
-        System.out.println("users" + users);
-    }
 }

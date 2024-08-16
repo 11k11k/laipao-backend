@@ -12,19 +12,24 @@ import com.laioj.project.model.request.UserLoginRequest;
 import com.laioj.project.model.request.UserRegisterRequest;
 import com.laioj.project.service.UserService;
 import com.laioj.project.service.impl.UserServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.laioj.project.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -35,7 +40,8 @@ import static com.laioj.project.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@Slf4j
 public class UserController {
     /**
      * ~
@@ -47,6 +53,9 @@ public class UserController {
     private UserMapper userMapper;
     @Autowired
     private UserService userService;
+    @Resource
+    private RedisTemplate redisTemplate;
+
     /**
      * 通过主键查询单条数据
      *
@@ -73,7 +82,7 @@ public class UserController {
     //登录
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest,
-                                    HttpServletRequest httpServletRequest) {
+                                        HttpServletRequest httpServletRequest) {
         if (userLoginRequest == null) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
@@ -84,8 +93,12 @@ public class UserController {
         }
         User user = userService.userLogin(userAccount, userPassword, httpServletRequest);
         System.out.println(user);
+        if(ObjectUtils.isEmpty(user)) {
+            return ResultUtils.error(222,"未找到用户或则用户未注册或则不符合规范","用户未注册");
+        }
         return ResultUtils.success(user);
     }
+
     //注册
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -102,9 +115,10 @@ public class UserController {
         long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
         return ResultUtils.success(result);
     }
-//   获取当前用户信息
+
+    //   获取当前用户信息
     @GetMapping("/current")
-    public BaseResponse<User> getCurrentUser(HttpServletRequest httpServletRequest ) {
+    public BaseResponse<User> getCurrentUser(HttpServletRequest httpServletRequest) {
         Object userObj = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         System.out.println(userObj);
         User currentUser = (User) userObj;
@@ -121,12 +135,12 @@ public class UserController {
 
     //修改用户信息
     @PostMapping("/update")
-    public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest httpServletRequest) {
-        if(user==null){
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest httpServletRequest) {
+        if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User currentUser = userService.getCurrentUser(httpServletRequest);
-        if(currentUser == null){
+        if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
 
@@ -134,25 +148,30 @@ public class UserController {
 
         return ResultUtils.success(result);
     }
+
     @GetMapping("/recommend")
-    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-//        String redisKey = String.format("laopao:user:recommend:%s", loginUser.getId());
-//        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
-        // 如果有缓存，直接读缓存
-//        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
-//        if (userPage != null) {
-//            return ResultUtils.success(userPage);
-//        }
-        // 无缓存，查数据库
+    public BaseResponse<Page<User>> recommendUsers(int pageNum, int pageSize, HttpServletRequest request) {
+        User loginUser = userService.getCurrentUser(request);
+        //定义redis的键
+        String redisKey = String.format("laopao:user:recommend:%s", loginUser.getId());
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+//         如果有缓存，直接读缓存
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+        if (userPage != null) {
+            return ResultUtils.success(userPage);
+        }
+//         无缓存，查数据库
+
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        Page<User> userPage = userMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
-        // 写缓存
-//        try {
-//            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
-//        } catch (Exception e) {
-//            log.error("redis set key error", e);
-//        }
+
+        userPage = userMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+//         写缓存
+        try {
+            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis set key error", e);
+        }
+
         return ResultUtils.success(userPage);
     }
 }

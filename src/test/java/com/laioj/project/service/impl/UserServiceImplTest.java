@@ -3,6 +3,7 @@ package com.laioj.project.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.laioj.project.common.BaseResponse;
+import com.laioj.project.config.RedisTemplateConfig;
 import com.laioj.project.controller.UserController;
 import com.laioj.project.mapper.UserMapper;
 import com.laioj.project.model.entity.Tag;
@@ -13,21 +14,35 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import javax.annotation.Resource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class UserServiceImplTest {
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImplTest.class);
     @Resource
     UserMapper userMapper;
     @Resource
     UserService userService;
+//    @Qualifier("redisTemplate")
+//    @Autowired
+//    private RedisTemplate redisTemplate ;
 
     @Test
     void getUserTest() {
@@ -93,5 +108,21 @@ class UserServiceImplTest {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         Page<User> userPage = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
         System.out.println(userPage);
+    }
+    @Test
+    void selectSafeUser(){
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        List<User> userList = userService.list(userQueryWrapper);
+        List<User> collect = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        System.out.println(collect);
+    }
+    @Resource
+    private RedisTemplate redisTemplate;
+    @Test
+    void testRedis(){
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        valueOperations.set("laipao","这是测试");
+        log.info("这是读取redis的数据");
+        System.out.println(valueOperations.get("laipao"));
     }
 }

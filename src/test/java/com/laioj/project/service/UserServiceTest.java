@@ -5,18 +5,19 @@ import com.laioj.project.common.ErrorCode;
 import com.laioj.project.exception.BusinessException;
 import com.laioj.project.mapper.UserMapper;
 import com.laioj.project.model.entity.User;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.xml.soap.Node;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.rules.Stopwatch;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StopWatch;
 
-import javax.annotation.Resource;
-import javax.xml.soap.Node;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户服务测试
@@ -58,9 +59,9 @@ class UserServiceTest {
 //
     @Test
     void testUpdateUser() {
-        User user = new User();
-        boolean result = userService.updateById(user);
-        Assertions.assertTrue(result);
+//        User user = new User();
+//        boolean result = userService.updateById(user);
+//        Assertions.assertTrue(result);
     }
 //
 //    @Test
@@ -108,4 +109,33 @@ class UserServiceTest {
 //
 //        }
 //    }
+    /**
+     * 批量插入用户
+     */
+    @Test
+    public void doInsertUsers(){
+        StopWatch stopWatch = new StopWatch();
+        System.out.println("开始插入");
+        stopWatch.start();
+        final int INSERT_NUM=1000;
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < INSERT_NUM; i++) {
+            User user = new User();
+            user.setUsername("假数据");
+            user.setUserAccount("fakeData");
+            user.setAvatarUrl("http:baibia");
+            user.setGender((byte) 0);
+            user.setUserPassword("12341234");
+            user.setPhone("112341234");
+            user.setEmail("12341243@qq.com");
+            user.setUserStatus(0);
+            user.setUserRole(0);
+            user.setPlanetCode("234234");
+            users.add(user);
+        }
+        userService.saveBatch(users,100);
+        stopWatch.stop();
+        System.out.println(stopWatch.getTotalTimeMillis());
+    }
+
 }

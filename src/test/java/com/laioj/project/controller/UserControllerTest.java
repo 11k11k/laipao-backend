@@ -8,6 +8,9 @@ import com.laioj.project.model.entity.User;
 import com.laioj.project.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.redisson.Redisson;
+import org.redisson.api.RList;
+import org.redisson.api.RedissonClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -20,15 +23,21 @@ import static org.junit.Assert.*;
 @SpringBootTest
 
 public class UserControllerTest {
-    @Resource
-    private UserServiceImpl userServiceImpl;
+
 
     @Resource
     private UserController userController;
+    @Resource
+    private RedissonClient redissonClient;
     @Test
-    void testSelectOne() {
-        User user = userServiceImpl.selectByPrimaryKey(3L);
-       Assert.notNull(user);
+    void testRedis() {
+        System.out.println("测试");
+        RList<String> test00 = redissonClient.getList("test00");
+        boolean add = test00.add("测试redis");
+        System.out.println("添加成功"+add);
+        String s = test00.get(0);
+        System.out.println("输出存入数据"+s);
+
     }
 
     @Test
@@ -47,4 +56,5 @@ public class UserControllerTest {
     void getCurrentUser() {
 
     }
+
 }

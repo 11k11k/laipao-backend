@@ -12,7 +12,6 @@ import java.util.List;
  */
 public interface UserService extends IService<User> {
 
-    long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode);
 
     /**
      * 用户注册
@@ -22,7 +21,7 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 新用户 id
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword);
+    long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode);
 
     /**
      * 用户登录
@@ -52,36 +51,15 @@ public interface UserService extends IService<User> {
 
     boolean isAdmin(User loginUser);
 
-    /**
-     * 用户注销
-     *
-     * @param request
-     * @return
-     */
-    boolean userLogout(HttpServletRequest request);
-
-    int deleteByPrimaryKey(Long id);
-
-    int insert(User record);
-
-    int insertSelective(User record);
-
-    User selectByPrimaryKey(Long id);
-
-    int updateByPrimaryKeySelective(User record);
-
     int updateByPrimaryKeySelective(User user, User loginUser);
 
     User getCurrentUser(HttpServletRequest request);
 
-    int updateByPrimaryKey(User record);
-
     //根据标签查询用户
-     List<User> searchUsersByTags(List<String> tagNameList);
+    List<User> searchUsersByTags(List<String> tagNameList);
 
     User getSafetyUser(User originUser);
-    User getUser(User user);
 
-    void getUserTest();
+
 }
 
