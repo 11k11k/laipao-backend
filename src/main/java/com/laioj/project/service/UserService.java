@@ -3,6 +3,7 @@ package com.laioj.project.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.laioj.project.model.entity.User;
+import com.laioj.project.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -61,5 +62,6 @@ public interface UserService extends IService<User> {
     User getSafetyUser(User originUser);
 
 
+    List<User> matchUsers(long num, User loginUser);
 }
 

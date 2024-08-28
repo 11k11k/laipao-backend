@@ -10,6 +10,7 @@ import com.laioj.project.mapper.UserMapper;
 import com.laioj.project.model.entity.User;
 import com.laioj.project.model.request.UserLoginRequest;
 import com.laioj.project.model.request.UserRegisterRequest;
+import com.laioj.project.model.vo.UserVO;
 import com.laioj.project.service.UserService;
 import com.laioj.project.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -93,8 +94,8 @@ public class UserController {
         }
         User user = userService.userLogin(userAccount, userPassword, httpServletRequest);
         System.out.println(user);
-        if(ObjectUtils.isEmpty(user)) {
-            return ResultUtils.error(222,"未找到用户或则用户未注册或则不符合规范","用户未注册");
+        if (ObjectUtils.isEmpty(user)) {
+            return ResultUtils.error(222, "未找到用户或则用户未注册或则不符合规范", "用户未注册");
         }
         return ResultUtils.success(user);
     }
@@ -173,5 +174,23 @@ public class UserController {
         }
 
         return ResultUtils.success(userPage);
+    }
+
+    /**
+     * 获取最匹配的用户
+     *
+     * @param num
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        List<User> users = userService.matchUsers(num, loginUser);
+
+        return ResultUtils.success(users);
     }
 }

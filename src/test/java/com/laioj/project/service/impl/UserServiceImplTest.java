@@ -125,4 +125,10 @@ class UserServiceImplTest {
         log.info("这是读取redis的数据");
         System.out.println(valueOperations.get("laipao"));
     }
+
+    @Test
+    void matchUsers() {
+        List<User> list = userService.list();
+        System.out.println(list);
+    }
 }
