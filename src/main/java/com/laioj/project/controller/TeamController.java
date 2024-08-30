@@ -214,6 +214,13 @@ public class TeamController {
                 team.setHasJoin(hasJoin);
             });
         } catch (Exception e) {}
+
+//        3.查询已加入队伍的人数
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("teamId", teamIdList);
+        List<UserTeam> userTeamlist = userTeamServiceImpl.list(queryWrapper);
+        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamlist.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        teamList.forEach(team -> team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size()));
         return ResultUtils.success(teamList);
     }
 

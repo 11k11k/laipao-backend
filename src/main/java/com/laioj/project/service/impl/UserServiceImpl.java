@@ -11,6 +11,7 @@ import com.laioj.project.model.vo.UserVO;
 import com.laioj.project.utils.AlgorithmUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.Pair;
 import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserMapper userMapper;
+
     /**
      * 盐值，混淆密码
      */
@@ -223,18 +225,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.last("limit 50");
         //拼接and 查询
         for (String tagName : tagNameList) {
             userQueryWrapper = userQueryWrapper.like("tags", tagName);
         }
-        List<User> userList = userMapper.selectList(userQueryWrapper);
+//        List<User> userList = userMapper.selectList(userQueryWrapper);
+        List<User> userList = this.list(userQueryWrapper);
 //        List<User> userList = userMapper.getByTags(tagNameList);
         if (CollectionUtils.isEmpty(userList)) {
             System.out.println("为空");
         }
         List<User> collect = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
         System.out.println(collect);
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+
         return collect;
 
 ////        List<User> userList = userMapper.selectList(queryWrapper);
@@ -301,48 +305,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<User> matchUsers(long num, User loginUser) {
-        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.last("limit 30");
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id","tags");
+        queryWrapper.isNotNull("tags");
+//        先读取20条测试
+        queryWrapper.last("limit 20");
 //        List<User> list = this.list(userQueryWrapper);
-//       查询全部用户数据
-        List<User> userList = this.list(userQueryWrapper);
+//       查询用户数据
+        List<User> userList = this.list(queryWrapper);
 //       获取登录用户标签
         String tags = loginUser.getTags();
         Gson gson = new Gson();
 //       转换成list集合
         List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
         }.getType());
+//       [java]
         System.out.println(tagList);
-        // 用户列表的下表 => 相似度
-        SortedMap<Integer, Long> indexDistanceMap = new TreeMap<>();
+        // 用户列表的下标 => 相似度
+        List<Pair<User, Long>> list = new ArrayList<>();
         for (int i = 0; i <userList.size(); i++) {
             User user = userList.get(i);
             String userTags = user.getTags();
-            //无标签的
-            if (StringUtils.isBlank(userTags)){
+            //如果没有标签或则当前数据的用户id和登录用户ID相等，这跳过这个循环接着下一次循环
+            if (StringUtils.isBlank(userTags) || Objects.equals(user.getId(), loginUser.getId())){
                 continue;
             }
+//            将用户标签转换成list列表
             List<String> userTagList = gson.fromJson(userTags, new TypeToken<List<String>>() {
             }.getType());
+//            userTagList:[java]
             System.out.println("userTagList:"+userTagList);
-            //计算分数
+            //计算分数,判断相似度，越大越不像
             long distance = AlgorithmUtils.minDistance(tagList, userTagList);
             System.out.println("分数："+distance);
-            indexDistanceMap.put(i,distance);
+//            将集合加入到pair中
+            list.add(new Pair<>(user, distance));
         }
-        //下面这个是打印前num个的id和分数
-        List<User> userListVo = new ArrayList<>();
-        int i = 0;
-        for (Map.Entry<Integer,Long> entry : indexDistanceMap.entrySet()){
-            if (i > num){
-                break;
-            }
-            User user = userList.get(entry.getKey());
-            System.out.println(user.getId() + ":" + entry.getKey() + ":" + entry.getValue());
-            userListVo.add(user);
-            i++;
+        // 按编辑距离由小到大排序
+        List<Pair<User, Long>> topUserPairList = list.stream()
+                .sorted((a, b) -> (int) (a.getValue() - b.getValue()))
+                .limit(num)
+                .collect(Collectors.toList());
+        // 原本顺序的 userId 列表
+        List<Long> userIdList = topUserPairList.stream().map(pair -> pair.getKey().getId()).collect(Collectors.toList());
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.in("id", userIdList);
+        // 1, 3, 2
+        // User1、User2、User3
+        // 1 => User1, 2 => User2, 3 => User3
+//        使用Map集合来根据userId进行排序
+//        通过id获取到对应的User对象，存进新的集合中去，就可以完成排序
+        Map<Long, List<User>> userIdUserListMap = this.list(userQueryWrapper)
+                .stream()
+                .map(user -> getSafetyUser(user))
+                .collect(Collectors.groupingBy(User::getId));
+        List<User> finalUserList = new ArrayList<>();
+//        遍历原本顺讯的userId
+        for (Long userId : userIdList) {
+//            根据这个原本正常顺序的id存进去这个列表中去
+            finalUserList.add(userIdUserListMap.get(userId).get(0));
         }
-        return userListVo;
+        return finalUserList;
 
     }
 

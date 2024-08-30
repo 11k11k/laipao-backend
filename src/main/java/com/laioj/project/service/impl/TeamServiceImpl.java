@@ -32,6 +32,7 @@ import com.laioj.project.model.entity.Team;
 import com.laioj.project.service.TeamService;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -250,6 +251,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         BeanUtils.copyProperties(team, updateTeam);
         return this.updateById(updateTeam);
     }
+
 
     @Override
     public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) {
