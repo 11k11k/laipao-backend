@@ -3,12 +3,7 @@ spring:
     active: dev
   application:
     name: laioj-backend
-  # DataSource Config
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/laipao
-    username: root
-    password: root
+
 #版本兼容
   mvc:
     pathmatch:
@@ -28,6 +23,12 @@ server:
     session:
       cookie:
         domain: localhost
+  # DataSource Config
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/laipao
+    username: root
+    password: root
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
